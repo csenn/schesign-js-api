@@ -1,30 +1,71 @@
-## Intro
+# Schesign Api Wrapper
 
-At their core, Schesign data designs are graphs. A JSON serialization of the graph can be accessed through the API. This library provides a wrapper to interact with the API and manage the graph.
+At their core, Schesign data designs are graphs. A JSON serialization of the graph can be accessed through the API. This library provides a wrapper to interact with the API and manage the graphs.
+
+This serialization is meant to be simple, expressive, and extensible. The versioned graph can be converted to various other formats through helper libraries.
+
+* [schesign-js-json-schema](https://github.com/csenn/schesign-js-json-schema)
+* [schesign-js-xml-schema](https://github.com/csenn/schesign-js-xml-schema)
+* [schesign-js-sql](https://github.com/csenn/schesign-js-sql)
+
+### Introduction
+
+In the following examples, the first url leads to the data design through the UI. The next url (with ?format=json appended to the end) returns the graph in json form.
+
+Example Online Store
+* [https://www.schesign.com/o/examples/example_online_store/1.1.0](https://www.schesign.com/o/examples/example_online_store/1.1.0)
+
+* [https://www.schesign.com/o/examples/example_online_store/1.1.0?format=json](https://www.schesign.com/o/examples/example_online_store/1.1.0?format=json)
+
+Example Shoe Store with graph connecting 2 data designs
+* [https://www.schesign.com/o/examples/example_online_shoe_store/1.1.0](https://www.schesign.com/o/examples/example_online_shoe_store/1.1.0)
+
+* [https://www.schesign.com/o/examples/example_online_shoe_store/1.1.0?format=json](https://www.schesign.com/o/examples/example_online_shoe_store/1.1.0?format=json)
 
 
-npm install schesign-js-api
+### Install
+```
+npm install schesign-js-api --save
+```
 
 
-### Fetching a graph for a design
+## Examples
+#### Fetching a graph for a design
 
-import api from 'schesign-js-api'
+```
+import { fetchGraph, util } from 'schesign-js-api'
 
-const uid = api.util.createUid({
+const uid = util.createUid({
   ownerType: 'o',
   userOrOrg: 'examples',
   designName: 'example_online_shoe_store',
   versionLabel: '1.1.0'
 });
 
+/*
+  Creates the data design's uid with a convenience function
+  https://www.schesign.com/o/examples/example_online_shoe_store/1.1.0
+*/
 console.log(uid);
-// https://www.schesign.com/o/examples/example_online_shoe_store/1.1.0
 
 var options = { uid: uid };
 
-api.fetchGraph(options).then(json => {
+fetchGraph(options).then(json => {
   console.log(json);
 }).catch(err => {
   console.log(err);
 });
+```
+
+## Api
+
+#### fetchGraph(options)
+* uid - the unique id/url of the data design
+
+#### utils.createUid(options)
+* ownerType - can be either 'o' or 'u' for org or user
+* userOrOrg - user or org depending on ownerType
+* designName - the name of the design
+* versionLabel - the version to be fetched
+
 
