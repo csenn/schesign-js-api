@@ -2,7 +2,7 @@
   "name": "schesign-js-api",
   "version": "0.1.0",
   "license": "MIT",
-  "description": "Interact with the scheisgn api",
+  "description": "Interact with the schesign api",
   "repository": {
     "type": "git",
     "url": "https://github.com/csenn/schesign-js-api.git"

@@ -68,4 +68,24 @@ fetchGraph(options).then(json => {
 * designName - the name of the design
 * versionLabel - the version to be fetched
 
+### Class
+* uid (string) - a url that uniquely defines the class
+* type (string) - 'Class'
+* label (string) - Human readable label
+* description (string, optional) - Description of the class
+* subClassOf (string, optional) - A uid referencing a parent class this class inherits from
+* excludeParentProperties (array, optional) - Array of property uids that should not be inherited by current class
+* propertyRefs (array) - An array of propertyRef objects.
+  * ref (string, required) - uid referencing a property
+  * cardinality (object) - Describes the number of items that can exist.
+    * minItems (integer, required) - A number >= 0
+    * maxItems (integer, required) - A number >= 1
+  * index (optional) - Whether or not the the property should be indexed when exported to a database design
+  * unique (boolean, optional) - Whether or not the value should be unique when there is a collection of classes in a database
 
+### Property
+* uid (string) - a url that uniquely defines the class
+* type (string) - 'Property'
+* label (string) - Human readable label
+* description (string, optional) - Description of the class
+* range (object) - Information about the property type
