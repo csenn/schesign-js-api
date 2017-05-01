@@ -1,62 +1,125 @@
-/* Speical types */
-export const LINKED_CLASS = 'LinkedClass';
-export const NESTED_OBJECT = 'NestedObject';
+import fetch from 'node-fetch';
+fetch.Promise = require('bluebird');
 
-/* Main Primitives */
-export const TEXT = 'Text';
-export const NUMBER = 'Number';
-export const BOOLEAN = 'Boolean';
-export const DATE = 'Date';
-export const ENUM = 'Enum';
+const GET = 'GET';
+const PUT = 'PUT';
+const POST = 'POST';
 
-export const TEXT_FORMAT_URL = 'Url';
-export const TEXT_FORMAT_EMAIL = 'Email';
-export const TEXT_FORMAT_HOSTNAME = 'Hostname';
-
-export const DATE_SHORT = 'ShortDate';
-export const DATE_DATETIME = 'DateTime';
-export const DATE_TIME = 'Time';
-
-export const NUMBER_INT = 'Int';
-export const NUMBER_INT_8 = 'Int8';
-export const NUMBER_INT_16 = 'Int16';
-export const NUMBER_INT_32 = 'Int32';
-export const NUMBER_INT_64 = 'Int64';
-
-export function createUid(options) {
-  const {
-    ownerType,
-    userOrOrg,
-    designName,
-    versionLabel,
-    resourceType,
-    classOrProperty,
-  } = options;
-
-  if (ownerType !== 'u' && ownerType !== 'o') {
-    throw new Error('Bad owner type');
-  }
-  if (!userOrOrg) {
-    throw new Error('User or org is required');
-  }
-
-  let path = `/${ownerType}/${userOrOrg}`;
-
-  if (designName) {
-    path += `/${designName}`;
-    if (versionLabel) {
-      path += `/${versionLabel}`;
-      if (resourceType) {
-        if (resourceType !== 'class' && resourceType !== 'property') {
-          throw new Error('Bad resource type');
-        }
-        if (!classOrProperty) {
-          throw new Error('Class or property required to get here');
-        }
-        path += `/${resourceType}/${classOrProperty}`;
-      }
-    }
-  }
-
-  return `https://www.schesign.com${path.toLowerCase()}`;
+// http://stackoverflow.com/questions/316781/how-to-build-query-string-with-javascript/34209399#34209399
+function buildQueryParams(params) {
+  return Object.keys(params)
+    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
+    .join('&');
 }
+
+function getHeaders(token) {
+  return {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+function getUrl(path, opts) {
+  const host = opts.host || 'https://www.schesign.com';
+  if (path.indexOf('/') !== 0) {
+    throw new Error(`path must have a leading slash: ${path}`);
+  }
+  return `${host}${path}`;
+}
+
+
+function _doFetch(method, token, path, json, opts) {
+  const fetchOpts = { method, headers: getHeaders(token) };
+  let url = getUrl(path, opts);
+
+  if (json && (method === POST || method === PUT)) {
+    fetchOpts.body = JSON.stringify(json);
+  } else if (method === GET) {
+    url += buildQueryParams(json);
+  }
+
+  return fetch(url, fetchOpts).then(res => {
+    return res.json().then(resultJson => {
+      if (res.status >= 400) {
+        throw new Error(`${resultJson.error && resultJson.error.message}`);
+      }
+      return resultJson;
+    });
+  });
+}
+
+export function get(token, path, query, opts) {
+  return _doFetch(GET, token, path, query, opts);
+}
+
+export function put(token, path, json, opts) {
+  return _doFetch(PUT, token, path, json, opts);
+}
+
+export function post(token, path, json, opts) {
+  return _doFetch(POST, token, path, json, opts);
+}
+
+
+// export function post(token, path, json, opts) {
+//   return fetch(url, {
+//     headers,
+//     method: 'POST',
+//     body: JSON.stringify(json),
+//   })
+//   .then(res => {
+//     return res.json().then(resultJson => {
+//       if (res.status >= 400) {
+//         throw new Error(`${resultJson.error && resultJson.error.message}`);
+//       }
+//       return resultJson;
+//     });
+//   });
+// }
+
+
+// // export function fetchGraph(options) {
+// //   if (!options.uid) {
+// //     throw new Error('Must include a uid for the resource being fetched');
+// //   }
+
+// //   const query = buildQueryParams({
+// //     format: 'json',
+// //   });
+
+
+// //   return fetch(`${options.uid}?${query}`)
+// //     .then(res => {
+// //       return res.json().then(json => {
+// //         if (res.status >= 400) {
+// //           throw new Error(`Error ${res.status}: ${json.message}`);
+// //         }
+// //         return json;
+// //       });
+// //     });
+// // }
+
+// // export function getDesigns(options) {
+// //     // if (!options.uid) {
+// //   //   throw new Error('Must include a uid for the resource being fetched');
+// //   // }
+
+// //   // const query = buildQueryParams({
+// //   //   format: 'json',
+// //   // });
+
+// //   const headers = {
+// //     // Authorization: 'Bearer 58ae4656a65d0ae4635fe86e.H3gaYaRo9CRIt4hLzYg1sgpAXUCG'
+// //   };
+
+// //   return fetch('http://localhost:9222/api/v1/design/list?user=u/csenn', { headers })
+// //     .then(res => {
+// //       return res.json().then(json => {
+// //         if (res.status >= 400) {
+// //           throw new Error(`${json.error.message}`);
+// //         }
+// //         return json;
+// //       });
+// //     });
+// // }
